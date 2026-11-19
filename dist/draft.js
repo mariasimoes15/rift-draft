@@ -3,10 +3,41 @@ const roles = ['Top', 'Jungle', 'Mid', 'ADC', 'Support'];
 const roleChampions = [
   'Aatrox Camille Darius Fiora Gangplank Garen Gnar Gwen Jax Kennen KSante Malphite Mordekaiser Ornn Renekton Riven Rumble Sett Shen Sion Teemo Urgot',
   'Amumu Elise Evelynn Fiddlesticks Graves Hecarim Ivern JarvanIV Karthus Khazix Kindred LeeSin Lillia MasterYi Nidalee Nocturne Nunu Poppy Rammus RekSai Sejuani Vi Viego Warwick XinZhao',
-  'Ahri Akali Anivia Annie AurelionSol Azir Cassiopeia Diana Ekko Galio Katarina Leblanc Lissandra Lux Orianna Ryze Swain Syndra Talon TwistedFate Veigar Viktor Yasuo Yone Zed Zoe',
+  'Ahri Akali Anivia Annie AurelionSol Azir Cassiopeia Diana Ekko Galio Katarina Leblanc Lissandra Lux Orianna Ryze Swain Syndra Talon TwistedFate Veigar Viktor Yasuo Yone Zed Ziggs Zoe',
   'Aphelios Ashe Caitlyn Corki Draven Ezreal Jhin Jinx Kaisa Kalista KogMaw Lucian MissFortune Samira Sivir Smolder Tristana Twitch Varus Vayne Xayah Zeri',
   'Alistar Bard Blitzcrank Brand Braum Janna Karma Leona Lulu Morgana Nami Nautilus Pyke Rakan Rell Renata Senna Seraphine Sona Soraka TahmKench Taric Thresh Yuumi Zyra'
 ].map(group => group.split(' '));
+
+// Simulated lane distributions. Champions outside this table use their primary role.
+// The order is Top, Jungle, Mid, ADC, Support.
+const flexRoles = {
+  Camille: [88, 8, 0, 0, 4], Garen: [90, 0, 10, 0, 0],
+  Graves: [10, 90, 0, 0, 0], Gragas: [37, 42, 16, 0, 5],
+  Gwen: [79, 21, 0, 0, 0], Jax: [85, 15, 0, 0, 0],
+  Kennen: [86, 0, 14, 0, 0], Malphite: [78, 0, 15, 0, 7],
+  Poppy: [38, 49, 0, 0, 13], Rumble: [70, 13, 17, 0, 0],
+  Sett: [80, 0, 10, 0, 10], Shen: [87, 0, 0, 0, 13],
+  Volibear: [57, 43, 0, 0, 0], Warwick: [18, 82, 0, 0, 0],
+  Diana: [0, 64, 36, 0, 0], Ekko: [0, 60, 40, 0, 0],
+  Galio: [9, 0, 71, 0, 20], Karthus: [0, 73, 11, 16, 0],
+  Lillia: [13, 87, 0, 0, 0], Lux: [0, 0, 44, 0, 56],
+  Morgana: [0, 12, 7, 0, 81], Swain: [9, 0, 32, 21, 38],
+  Taliyah: [0, 60, 40, 0, 0], Yasuo: [17, 0, 75, 8, 0],
+  Yone: [44, 0, 56, 0, 0], Ashe: [0, 0, 0, 79, 21],
+  Corki: [0, 0, 58, 42, 0], Seraphine: [0, 0, 12, 23, 65],
+  Senna: [0, 0, 0, 15, 85], Karma: [8, 0, 11, 0, 81],
+  Brand: [0, 25, 13, 0, 62], Zyra: [0, 12, 0, 0, 88]
+};
+const historicalFlex = {
+  '6.18.1': { Ashe: [0, 0, 0, 100, 0], Diana: [0, 35, 65, 0, 0], Poppy: [65, 34, 0, 0, 1], Brand: [0, 0, 30, 0, 70] },
+  '9.19.1': { Ashe: [0, 0, 0, 100, 0], Corki: [0, 0, 94, 6, 0], Brand: [0, 0, 15, 0, 85] },
+  '11.19.1': { Corki: [0, 0, 94, 6, 0] }
+};
+const draftChampions = [...new Set([...roleChampions.flat(), ...Object.keys(flexRoles)])];
+function roleProbability(id, role, patch) {
+  const distribution = historicalFlex[patch]?.[id] ?? flexRoles[id];
+  return distribution ? distribution[role] / 100 : Number(roleChampions[role].includes(id));
+}
 
 const traits = {
   ap: 'Gwen Kennen Malphite Mordekaiser Rumble Teemo Amumu Elise Evelynn Fiddlesticks Ivern Karthus Lillia Nidalee Nunu Rammus Sejuani Ahri Akali Anivia Annie AurelionSol Azir Cassiopeia Diana Ekko Galio Katarina Leblanc Lissandra Lux Orianna Ryze Swain Syndra TwistedFate Veigar Viktor Zoe Alistar Bard Blitzcrank Brand Braum Janna Karma Leona Lulu Morgana Nami Nautilus Rakan Rell Renata Seraphine Sona Soraka TahmKench Taric Thresh Yuumi Zyra',
@@ -21,6 +52,12 @@ const traits = {
   shred: 'Camille Darius Fiora Gwen Mordekaiser Viego Cassiopeia Kaisa KogMaw Varus Vayne'
 };
 for (const [trait, ids] of Object.entries(traits)) traits[trait] = new Set(ids.split(' '));
+for (const [id, profile] of Object.entries({
+  Gragas: ['ap', 'frontline', 'engage', 'peel'], Volibear: ['frontline', 'engage', 'dive', 'tempo'],
+  Taliyah: ['ap', 'poke', 'peel', 'execution'], Ziggs: ['ap', 'poke']
+})) {
+  for (const key of profile) traits[key].add(id);
+}
 const trait = (id, key) => Number(traits[key].has(id));
 const tags = {
   frontline: 'Linha da frente', engage: 'Iniciação', peel: 'Proteção', poke: 'Poke',
@@ -49,25 +86,67 @@ const laneEdges = [
   ['Morgana', 'Thresh'], ['Janna', 'Rell'], ['Rakan', 'Karma'], ['Lulu', 'Pyke']
 ];
 
-function draftPools(scenario) {
-  const legal = new Set(rosters[scenario.patch]);
-  if (scenario.pool) {
-    return scenario.pool.map(row => row.split(' ').filter(id => legal.has(id) && !scenario.enemy.includes(id)));
-  }
+// The alternatives preserve the named scenario's draft theme.
+const rivalAlternatives = [
+  ['Gnar Rumble', 'Nidalee Lillia', 'Lux Viktor', 'Caitlyn Ezreal', 'Zyra Seraphine'],
+  ['Malphite Renekton', 'JarvanIV Nocturne', 'Ahri Lissandra', 'Tristana Kalista', 'Alistar Nautilus'],
+  ['Shen Sion', 'Ivern Amumu', 'Orianna Anivia', 'KogMaw Twitch', 'Janna Braum'],
+  ['Darius Sett', 'Elise LeeSin', 'Talon TwistedFate', 'Lucian Caitlyn', 'Blitzcrank Pyke'],
+  ['Ornn Malphite', 'Sejuani JarvanIV', 'Galio Swain', 'Aphelios Jinx', 'Rakan Nautilus'],
+  ['Kennen Teemo', 'Graves Elise', 'Ziggs Viktor', 'Caitlyn Varus', 'Karma Nami'],
+  ['Fiora Jax', 'Khazix Evelynn', 'Talon Leblanc', 'Twitch Tristana', 'Thresh Blitzcrank'],
+  ['Renekton Gnar', 'Vi XinZhao', 'Galio Annie', 'Lucian Samira', 'Leona Rakan']
+];
 
-  let seed = scenario.seed;
-  return roleChampions.map((row, role) => {
-    const options = row.filter(id => legal.has(id) && !scenario.enemy.includes(id));
-    for (let index = options.length - 1; index > 0; index--) {
-      seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
-      const swap = seed % (index + 1);
-      [options[index], options[swap]] = [options[swap], options[index]];
-    }
-    const laneCounter = laneEdges.find(([pick, enemy]) => enemy === scenario.enemy[role] && options.includes(pick));
-    const pool = options.slice(0, 7);
-    if (laneCounter && !pool.includes(laneCounter[0])) pool[3] = laneCounter[0];
-    return pool;
-  });
+function seededDraw(seed) {
+  return () => {
+    seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+    return seed / 2 ** 32;
+  };
+}
+
+function weightedTake(options, random) {
+  const total = options.reduce((sum, option) => sum + option.weight, 0);
+  let ticket = random() * total;
+  const index = options.findIndex(option => (ticket -= option.weight) < 0);
+  return options.splice(index < 0 ? options.length - 1 : index, 1)[0].id;
+}
+
+function encounter(index) {
+  const scenario = scenarios[index];
+  const legal = new Set(rosters[scenario.patch]);
+  const random = seededDraw(scenario.seed);
+  const enemy = [];
+  for (const [role, featured] of scenario.enemy.entries()) {
+    const candidates = [featured, ...rivalAlternatives[index][role].split(' ')]
+      .filter(id => legal.has(id) && !enemy.includes(id))
+      .map(id => ({ id, weight: roleProbability(id, role, scenario.patch) * (id === featured ? 3 : 1) }))
+      .filter(option => option.weight > 0);
+    enemy.push(weightedTake(candidates, random));
+  }
+  return { ...scenario, enemy };
+}
+
+function draftPool(scenario, openRoles, assigned) {
+  const legal = new Set(rosters[scenario.patch]);
+  const mask = openRoles.reduce((value, role) => value | (1 << role), 0);
+  const random = seededDraw(scenario.seed + 1000 + 53 * mask);
+  const eligible = draftChampions.filter(id => legal.has(id) && !scenario.enemy.includes(id) && !assigned.includes(id));
+  const selected = [];
+  const startingRole = Math.floor(random() * openRoles.length);
+  const featured = openRoles.map(role => new Set(scenario.pool?.[role].split(' ') ?? []));
+  for (let index = 0; index < 6; index++) {
+    const offset = (startingRole + index) % openRoles.length;
+    const role = openRoles[offset];
+    const options = eligible.filter(id => !selected.includes(id)).map(id => {
+      const counter = laneEdges.some(([pick, enemy]) => id === pick && scenario.enemy[role] === enemy);
+      return { id, weight: roleProbability(id, role, scenario.patch) ** 1.5 * (featured[offset].has(id) || counter ? 2 : 1) };
+    }).filter(option => option.weight > 0);
+    selected.push(weightedTake(options, random));
+  }
+  const wildcard = eligible.filter(id => !selected.includes(id)).map(id => ({ id, weight: 1 }));
+  selected.splice(Math.floor(random() * 7), 0, weightedTake(wildcard, random));
+  return selected;
 }
 
 function totals(team) {
@@ -78,9 +157,9 @@ function totals(team) {
 
 function scoring(scenario) {
   const rival = totals(scenario.enemy);
-  const soloEdges = roleChampions.map((pool, index) => {
+  const soloEdges = roles.map((_, index) => {
     const opponent = scenario.enemy[index];
-    return Object.fromEntries(pool.map(id => {
+    return Object.fromEntries(draftChampions.map(id => {
       const direct = laneEdges.reduce((edge, [pick, enemy]) =>
         edge + Number(id === pick && opponent === enemy) - Number(id === enemy && opponent === pick), 0);
       return [id, 1.4 * direct + 0.18 * trait(id, 'peel') * trait(opponent, 'dive')
@@ -110,15 +189,22 @@ function scoring(scenario) {
       + scenario.finesse * (0.5 * team.execution + 0.2 * Math.min(team.engage, team.dive));
   }
 
+  function suitability(team) {
+    return team.reduce((sum, id, role) =>
+      sum + 0.65 * Math.log(0.25 + 0.75 * roleProbability(id, role, scenario.patch)), 0);
+  }
+
   const rivalStructure = structure(rival, scenario.enemy[4]);
   const rivalContext = context(rival);
+  const rivalSuitability = suitability(scenario.enemy);
   return function score(team) {
     const stats = totals(team);
     const matchup = team.reduce((sum, id, index) => sum + soloEdges[index][id], 0)
       + answers(stats, rival) - answers(rival, stats);
     const balance = structure(stats, team[4]) - rivalStructure;
     const fit = context(stats) - rivalContext;
-    return { percent: 50 + 32 * Math.tanh((matchup + balance + fit) / 8), matchup, balance, fit };
+    const lanes = suitability(team) - rivalSuitability;
+    return { percent: 50 + 32 * Math.tanh((matchup + balance + fit + lanes) / 8), matchup, balance, fit, lanes };
   };
 }
 

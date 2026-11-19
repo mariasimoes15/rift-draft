@@ -56,7 +56,7 @@
       </div>
       <div id="options" class="options"></div>
       <div class="pool-footer">
-        <p><span aria-hidden="true">◇</span> Winrate simulado</p>
+        <p><span aria-hidden="true">◇</span> Probabilidades de role e winrate simulados</p>
         <button type="button" id="evaluate" class="gold-button" disabled>Calcular winrate</button>
       </div>
     </section>
@@ -69,7 +69,7 @@
       <div id="result-metrics" class="result-metrics"></div>
       <div id="result-factors" class="result-factors"></div>
       <div class="benchmark">
-        <h3>Melhor equipa do cenário</h3>
+        <h3>Melhor equipa com os sorteios que tiveste</h3>
         <div id="best-team" class="team"></div>
       </div>
     </section>
@@ -84,10 +84,10 @@
     <h2 id="help-title">Como jogar</h2>
     <ol>
       <li>Vê a equipa adversária, o patch da season e o rank do cenário.</li>
-      <li>Escolhe um champion para cada posição. Cada lista tem sete opções que já existiam no patch. Podes trocar de posição durante o draft.</li>
-      <li>Calcula o winrate e compara-o com a melhor combinação das opções disponíveis.</li>
+      <li>Seleciona uma posição e escolhe qualquer champion da pool partilhada. O sorteio favorece as posições que ainda estão livres.</li>
+      <li>Completa as cinco posições e compara o teu winrate com a melhor equipa possível usando a pool que saiu quando preencheste cada posição.</li>
     </ol>
-    <p>O modelo usa interações entre champions, equilíbrio da equipa e adequação ao cenário. O resultado é simulado com regras do jogo, sem estatísticas de partidas ranked.</p>
+    <p>A percentagem em cada carta indica a probabilidade simulada de o champion jogar na posição selecionada. Podes escolhê-lo mesmo a 0%, mas jogar fora da role reduz a pontuação. As probabilidades e o winrate seguem regras do jogo.</p>
     <form method="dialog"><button class="gold-button">Voltar ao draft</button></form>
   </dialog>
 </body>

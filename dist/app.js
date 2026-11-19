@@ -3,12 +3,13 @@ const percent = value => new Intl.NumberFormat('pt-PT', {
   minimumFractionDigits: 1, maximumFractionDigits: 1
 }).format(value);
 const roleMarks = ['▲', '✦', '◆', '◎', '✚'];
-const bestByScenario = new Map();
+const bestByPools = new Map();
 let scenarioIndex = 0;
 let scenario;
-let pools;
 let score;
 let lineup;
+let offersByRole;
+let availablePool;
 let activeRole;
 let showingResult;
 
@@ -37,15 +38,23 @@ function renderDraft() {
   $('results').hidden = !showingResult;
   if (showingResult) return;
 
+  const open = roles.map((_, index) => index).filter(index => !lineup[index]);
+  if (open.length) availablePool = draftPool(scenario, open, lineup);
+  const options = offersByRole[activeRole] ?? availablePool;
   $('active-role').textContent = roles[activeRole];
-  $('pool-note').textContent = `${pools[activeRole].length} opções disponíveis neste cenário`;
+  $('pool-note').textContent = lineup[activeRole] ? 'Pool disponível quando preencheste esta posição.'
+    : open.length === roles.length ? 'Pool partilhada pelas cinco posições.'
+      : `A pool favorece ${new Intl.ListFormat('pt-PT').format(open.map(index => roles[index]))}.`;
   $('reset').disabled = picked === 0;
   $('evaluate').disabled = picked !== roles.length;
-  $('options').innerHTML = pools[activeRole].map(id => {
-    const labels = Object.keys(tags).filter(key => trait(id, key)).slice(0, 2).map(key => tags[key]);
-    return `<button type="button" class="option" data-champion="${id}" aria-pressed="${lineup[activeRole] === id}">
+  $('options').innerHTML = options.map(id => {
+    const labels = Object.keys(tags).filter(key => trait(id, key)).slice(0, 1).map(key => tags[key]);
+    const chance = Math.round(100 * roleProbability(id, activeRole, scenario.patch));
+    const pickedElsewhere = lineup.includes(id) && lineup[activeRole] !== id;
+    return `<button type="button" class="option" data-champion="${id}" aria-pressed="${lineup[activeRole] === id}" ${pickedElsewhere ? 'disabled' : ''}>
       ${portrait(id)}
       <span class="option-name">${champions[id][0]}</span>
+      <span class="lane-odds" data-offrole="${chance === 0}">${chance}% ${roles[activeRole]}${chance === 0 ? ' · Fora da role' : ''}</span>
       <span class="option-trait">${labels.join(' · ') || (traits.ap.has(id) ? 'Dano mágico' : 'Dano físico')}</span>
     </button>`;
   }).join('');
@@ -53,10 +62,10 @@ function renderDraft() {
 
 function startScenario(index) {
   scenarioIndex = index;
-  scenario = scenarios[index];
-  pools = draftPools(scenario);
+  scenario = encounter(index);
   score = scoring(scenario);
   lineup = Array(roles.length).fill(null);
+  offersByRole = Array(roles.length).fill(null);
   activeRole = 0;
   showingResult = false;
   $('season').textContent = scenario.season;
@@ -70,18 +79,20 @@ function startScenario(index) {
 function showResult() {
   if (lineup.some(id => !id)) return;
   const result = score(lineup);
-  if (!bestByScenario.has(scenarioIndex)) bestByScenario.set(scenarioIndex, bestDraft(pools, score));
-  const best = bestByScenario.get(scenarioIndex);
+  const route = JSON.stringify([scenarioIndex, offersByRole]);
+  if (!bestByPools.has(route)) bestByPools.set(route, bestDraft(offersByRole, score));
+  const best = bestByPools.get(route);
   const gap = (Math.round(best.percent * 10) - Math.round(result.percent * 10)) / 10;
   showingResult = true;
   $('result-summary').textContent = result.percent === best.percent
-    ? 'Atingiste o melhor winrate do cenário.'
-    : gap === 0 ? 'Igualaste o melhor winrate à décima.' : `Ficaste a ${percent(gap)} p.p. do melhor winrate do cenário.`;
+    ? 'Atingiste o melhor winrate com as pools que te saíram.'
+    : gap === 0 ? 'Igualaste o melhor winrate à décima.' : `Ficaste a ${percent(gap)} p.p. do melhor winrate com estas pools.`;
   $('result-metrics').innerHTML = `
     <div><span>O TEU WINRATE SIMULADO</span><strong>${percent(result.percent)}%</strong></div>
-    <div><span>MÁXIMO NESTE CENÁRIO</span><strong>${percent(best.percent)}%</strong></div>`;
+    <div><span>MÁXIMO COM ESTAS POOLS</span><strong>${percent(best.percent)}%</strong></div>`;
   $('result-factors').innerHTML = [
-    ['Matchups', result.matchup], ['Equilíbrio da equipa', result.balance], ['Season e rank', result.fit]
+    ['Matchups', result.matchup], ['Equilíbrio da equipa', result.balance],
+    ['Season e rank', result.fit], ['Adequação às roles', result.lanes]
   ].map(([label, value]) => {
     const rounded = Math.round(value * 10) / 10;
     const impact = rounded > 0 ? 'Favorável' : rounded < 0 ? 'Desfavorável' : 'Neutro';
@@ -109,6 +120,8 @@ $('options').addEventListener('click', event => {
   if (!option) return;
   const id = option.dataset.champion;
   const role = activeRole;
+  if (lineup.includes(id) && lineup[role] !== id) return;
+  if (!offersByRole[role]) offersByRole[role] = availablePool;
   lineup[role] = id;
   const nextRole = lineup.findIndex((pick, index) => !pick && index > role);
   const firstEmpty = lineup.indexOf(null);
@@ -117,7 +130,7 @@ $('options').addEventListener('click', event => {
   $('announcement').textContent = `${champions[id][0]} em ${roles[role]}. ${firstEmpty < 0 ? 'Equipa completa.' : `A escolher para ${roles[activeRole]}.`}`;
   if (event.detail === 0) {
     if (firstEmpty < 0) $('evaluate').focus();
-    else $('options').querySelector('button').focus();
+    else $('options').querySelector('button:not(:disabled)').focus();
   }
 });
 
@@ -127,6 +140,7 @@ $('new-scenario').addEventListener('click', () => {
 });
 $('reset').addEventListener('click', () => {
   lineup.fill(null);
+  offersByRole.fill(null);
   openRole(0, true);
   $('announcement').textContent = 'Picks limpos.';
 });
