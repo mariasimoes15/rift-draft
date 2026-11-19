@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0a121c">
+  <meta name="description" content="Monta uma equipa de League of Legends para superar o draft rival.">
+  <title>Rift Draft</title>
+  <link rel="stylesheet" href="style.css">
+  <script defer src="catalog.js"></script>
+  <script defer src="draft.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="wordmark"><span class="brand-mark" aria-hidden="true">✦</span> Rift Draft</div>
+      <button type="button" class="soft-button help-button" id="open-help"><span aria-hidden="true">?</span> Como jogar</button>
+    </div>
+  </header>
+  <main class="shell">
+    <section class="intro" aria-labelledby="title">
+      <div class="intro-copy">
+        <p class="eyebrow"><span></span> DESAFIO DE COUNTER-DRAFT</p>
+        <h1 id="title">Rift <em>Draft</em></h1>
+        <p>Lê o draft rival. Escolhe os teus cinco. Maximiza o winrate.</p>
+      </div>
+      <div class="context">
+        <div class="context-item"><span>SEASON</span><strong id="season"></strong><small id="patch"></small></div>
+        <div class="context-item"><span>RANK</span><strong id="rank"></strong></div>
+        <button type="button" id="new-scenario" class="soft-button scenario-button" aria-label="Próximo cenário" title="Próximo cenário"><span aria-hidden="true">⟳</span></button>
+      </div>
+    </section>
+
+    <div class="board">
+      <section class="panel enemy-panel" aria-labelledby="enemy-heading">
+        <div class="panel-header">
+          <div><h2 id="enemy-heading"><i aria-hidden="true"></i>Equipa adversária</h2><p id="enemy-style"></p></div>
+          <span class="side-label red">LADO VERMELHO</span>
+        </div>
+        <div id="enemy-team" class="team"></div>
+      </section>
+      <section class="panel player-panel" aria-labelledby="player-heading">
+        <div class="panel-header">
+          <div><h2 id="player-heading"><i aria-hidden="true"></i>A tua equipa</h2><p>Escolhe um champion por posição.</p></div>
+          <span id="count" class="side-label blue"></span>
+        </div>
+        <div id="player-team" class="team"></div>
+      </section>
+    </div>
+
+    <section class="panel pool-panel" id="draft-panel" aria-labelledby="pool-heading">
+      <div class="panel-header">
+        <div><h2 id="pool-heading">Escolhe para <span id="active-role"></span></h2><p id="pool-note"></p></div>
+        <button type="button" id="reset" class="text-button">Limpar picks</button>
+      </div>
+      <div id="options" class="options"></div>
+      <div class="pool-footer">
+        <p><span aria-hidden="true">◇</span> Winrate simulado</p>
+        <button type="button" id="evaluate" class="gold-button" disabled>Calcular winrate</button>
+      </div>
+    </section>
+
+    <section class="panel results" id="results" aria-labelledby="result-heading" hidden>
+      <div class="panel-header">
+        <div><h2 id="result-heading" tabindex="-1">Resultado do draft</h2><p id="result-summary"></p></div>
+        <button type="button" id="edit" class="soft-button">Rever picks</button>
+      </div>
+      <div id="result-metrics" class="result-metrics"></div>
+      <div id="result-factors" class="result-factors"></div>
+      <div class="benchmark">
+        <h3>Melhor equipa do cenário</h3>
+        <div id="best-team" class="team"></div>
+      </div>
+    </section>
+    <div id="announcement" class="sr-only" role="status"></div>
+  </main>
+  <footer class="site-footer shell">
+    <span>Rift Draft · Jogo de fãs</span>
+    <span>Catálogo e retratos: <a href="https://developer.riotgames.com/docs/lol#data-dragon">Riot Data Dragon</a> · Inspirado no <a href="https://github.com/JoaoASimoes/82-0">82–0</a></span>
+  </footer>
+
+  <dialog id="help" aria-labelledby="help-title">
+    <h2 id="help-title">Como jogar</h2>
+    <ol>
+      <li>Vê a equipa adversária, o patch da season e o rank do cenário.</li>
+      <li>Escolhe um champion para cada posição. Cada lista tem sete opções que já existiam no patch. Podes trocar de posição durante o draft.</li>
+      <li>Calcula o winrate e compara-o com a melhor combinação das opções disponíveis.</li>
+    </ol>
+    <p>O modelo usa interações entre champions, equilíbrio da equipa e adequação ao cenário. O resultado é simulado com regras do jogo, sem estatísticas de partidas ranked.</p>
+    <form method="dialog"><button class="gold-button">Voltar ao draft</button></form>
+  </dialog>
+</body>
+</html>
