@@ -41,8 +41,12 @@ h1, h2, h3, p { margin: 0; }
   transition: background .16s, border-color .16s;
 }
 .soft-button:hover { background: #223347; border-color: #526b81; }
-.help-button { display: inline-flex; gap: 8px; align-items: center; }
+.header-actions, .help-button { display: flex; gap: 8px; align-items: center; }
 .help-button span { display: grid; place-items: center; width: 17px; height: 17px; border: 1px solid #aebdcb; color: #d4dce3; border-radius: 50%; font-size: .7rem; }
+.help-button span[data-i18n] { display: inline; width: auto; height: auto; border: 0; color: inherit; font-size: inherit; }
+.language-switch { display: flex; padding: 3px; border: 1px solid var(--line); border-radius: 6px; background: #101a27; }
+.language-switch button { border: 0; border-radius: 4px; padding: 5px 8px; background: transparent; color: var(--muted); font-size: .75rem; font-weight: 750; }
+.language-switch button[aria-pressed="true"] { background: #2a4054; color: var(--text); }
 
 .intro {
   min-height: 210px;
@@ -167,8 +171,6 @@ button.slot[aria-pressed="true"] .empty-portrait { border-color: #8dc4e9; color:
 .option:hover, .option[aria-pressed="true"] { background: #25323c; border-color: var(--gold); }
 .option:disabled { opacity: .47; background: #152334; border-color: #324456; }
 .option-name { font-size: .875rem; font-weight: 720; }
-.lane-odds { color: var(--blue); font-size: .75rem; font-weight: 670; }
-.lane-odds[data-offrole="true"] { color: #e7aaa1; }
 .option-trait { color: #b4c2d1; font-size: .75rem; line-height: 1.27; }
 .pool-footer { margin-top: 14px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .pool-footer p { color: var(--muted); font-size: .875rem; }
@@ -209,6 +211,7 @@ dialog form { margin-top: 18px; }
   .options { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 @media (max-width: 440px) {
+  .help-button span[data-i18n] { display: none; }
   .team { gap: 4px; }
   .slot { min-height: 99px; }
   .slot .portrait, .empty-portrait { --portrait: 37px; --scale: .79; }

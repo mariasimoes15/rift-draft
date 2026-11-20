@@ -15,15 +15,21 @@
   <header class="site-header">
     <div class="header-inner">
       <div class="wordmark"><span class="brand-mark" aria-hidden="true">✦</span> Rift Draft</div>
-      <button type="button" class="soft-button help-button" id="open-help"><span aria-hidden="true">?</span> Como jogar</button>
+      <div class="header-actions">
+        <div class="language-switch" id="language-switch" aria-label="Idioma">
+          <button type="button" data-language="pt" aria-pressed="true">PT</button>
+          <button type="button" data-language="en" aria-pressed="false">EN</button>
+        </div>
+        <button type="button" class="soft-button help-button" id="open-help"><span aria-hidden="true">?</span> <span data-i18n="howToPlay">Como jogar</span></button>
+      </div>
     </div>
   </header>
   <main class="shell">
     <section class="intro" aria-labelledby="title">
       <div class="intro-copy">
-        <p class="eyebrow"><span></span> DESAFIO DE COUNTER-DRAFT</p>
+        <p class="eyebrow"><span></span><span data-i18n="challenge">DESAFIO DE COUNTER-DRAFT</span></p>
         <h1 id="title">Rift <em>Draft</em></h1>
-        <p>Lê o draft rival. Escolhe os teus cinco. Maximiza o winrate.</p>
+        <p data-i18n="tagline">Lê o draft rival. Escolhe os teus cinco. Maximiza o winrate.</p>
       </div>
       <div class="context">
         <div class="context-item"><span>SEASON</span><strong id="season"></strong><small id="patch"></small></div>
@@ -34,61 +40,43 @@
 
     <div class="board">
       <section class="panel enemy-panel" aria-labelledby="enemy-heading">
-        <div class="panel-header">
-          <div><h2 id="enemy-heading"><i aria-hidden="true"></i>Equipa adversária</h2><p id="enemy-style"></p></div>
-          <span class="side-label red">LADO VERMELHO</span>
-        </div>
+        <div class="panel-header"><div><h2 id="enemy-heading"><i aria-hidden="true"></i><span data-i18n="enemyTeam">Equipa adversária</span></h2><p id="enemy-style"></p></div><span class="side-label red" data-i18n="redSide">LADO VERMELHO</span></div>
         <div id="enemy-team" class="team"></div>
       </section>
       <section class="panel player-panel" aria-labelledby="player-heading">
-        <div class="panel-header">
-          <div><h2 id="player-heading"><i aria-hidden="true"></i>A tua equipa</h2><p>Escolhe um champion por posição.</p></div>
-          <span id="count" class="side-label blue"></span>
-        </div>
+        <div class="panel-header"><div><h2 id="player-heading"><i aria-hidden="true"></i><span data-i18n="yourTeam">A tua equipa</span></h2><p data-i18n="choosePerRole">Escolhe um champion por posição.</p></div><span id="count" class="side-label blue"></span></div>
         <div id="player-team" class="team"></div>
       </section>
     </div>
 
     <section class="panel pool-panel" id="draft-panel" aria-labelledby="pool-heading">
-      <div class="panel-header">
-        <div><h2 id="pool-heading">Escolhe para <span id="active-role"></span></h2><p id="pool-note"></p></div>
-        <button type="button" id="reset" class="text-button">Limpar picks</button>
-      </div>
+      <div class="panel-header"><div><h2 id="pool-heading"><span data-i18n="chooseFor">Escolhe para</span> <span id="active-role"></span></h2><p id="pool-note"></p></div><button type="button" id="reset" class="text-button" data-i18n="clearPicks">Limpar picks</button></div>
       <div id="options" class="options"></div>
-      <div class="pool-footer">
-        <p><span aria-hidden="true">◇</span> Probabilidades de role e winrate simulados</p>
-        <button type="button" id="evaluate" class="gold-button" disabled>Calcular winrate</button>
-      </div>
+      <div class="pool-footer"><p><span aria-hidden="true">◇</span> <span data-i18n="simulatedModel">Modelo de composição e winrate simulado</span></p><button type="button" id="evaluate" class="gold-button" disabled data-i18n="calculate">Calcular winrate</button></div>
     </section>
 
     <section class="panel results" id="results" aria-labelledby="result-heading" hidden>
-      <div class="panel-header">
-        <div><h2 id="result-heading" tabindex="-1">Resultado do draft</h2><p id="result-summary"></p></div>
-        <button type="button" id="edit" class="soft-button">Rever picks</button>
-      </div>
+      <div class="panel-header"><div><h2 id="result-heading" tabindex="-1" data-i18n="draftResult">Resultado do draft</h2><p id="result-summary"></p></div><button type="button" id="edit" class="soft-button" data-i18n="reviewPicks">Rever picks</button></div>
       <div id="result-metrics" class="result-metrics"></div>
       <div id="result-factors" class="result-factors"></div>
-      <div class="benchmark">
-        <h3>Melhor equipa com os sorteios que tiveste</h3>
-        <div id="best-team" class="team"></div>
-      </div>
+      <div class="benchmark"><h3 data-i18n="bestTeam">Melhor equipa com os sorteios que tiveste</h3><div id="best-team" class="team"></div></div>
     </section>
     <div id="announcement" class="sr-only" role="status"></div>
   </main>
   <footer class="site-footer shell">
-    <span>Rift Draft · Jogo de fãs</span>
-    <span>Catálogo e retratos: <a href="https://developer.riotgames.com/docs/lol#data-dragon">Riot Data Dragon</a> · Inspirado no <a href="https://github.com/JoaoASimoes/82-0">82–0</a></span>
+    <span data-i18n="fanGame">Rift Draft · Jogo de fãs</span>
+    <span><span data-i18n="credits">Catálogo e retratos</span>: <a href="https://developer.riotgames.com/docs/lol#data-dragon">Riot Data Dragon</a> · <span data-i18n="inspired">Inspirado no</span> <a href="https://github.com/JoaoASimoes/82-0">82–0</a></span>
   </footer>
 
   <dialog id="help" aria-labelledby="help-title">
-    <h2 id="help-title">Como jogar</h2>
+    <h2 id="help-title" data-i18n="howToPlay">Como jogar</h2>
     <ol>
-      <li>Vê a equipa adversária, o patch da season e o rank do cenário.</li>
-      <li>Seleciona uma posição e escolhe qualquer champion da pool partilhada. O sorteio favorece as posições que ainda estão livres.</li>
-      <li>Completa as cinco posições e compara o teu winrate com a melhor equipa possível usando a pool que saiu quando preencheste cada posição.</li>
+      <li data-i18n="helpOne">Vê a equipa adversária, o patch da season e o rank do cenário.</li>
+      <li data-i18n="helpTwo">Seleciona uma posição e escolhe qualquer champion da pool partilhada. O sorteio favorece flex picks e as posições que ainda estão livres.</li>
+      <li data-i18n="helpThree">Completa as cinco posições e compara o teu winrate com a melhor equipa possível usando as pools que te saíram.</li>
     </ol>
-    <p>A percentagem em cada carta indica a probabilidade simulada de o champion jogar na posição selecionada. Podes escolhê-lo mesmo a 0%, mas jogar fora da role reduz a pontuação. As probabilidades e o winrate seguem regras do jogo.</p>
-    <form method="dialog"><button class="gold-button">Voltar ao draft</button></form>
+    <p data-i18n="helpModel">Cada champion tem uma adequação escondida às diferentes posições. Podes colocá-lo em qualquer role, mas uma escolha menos habitual reduz a pontuação final.</p>
+    <form method="dialog"><button class="gold-button" data-i18n="backToDraft">Voltar ao draft</button></form>
   </dialog>
 </body>
 </html>

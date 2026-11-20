@@ -59,10 +59,7 @@ for (const [id, profile] of Object.entries({
   for (const key of profile) traits[key].add(id);
 }
 const trait = (id, key) => Number(traits[key].has(id));
-const tags = {
-  frontline: 'Linha da frente', engage: 'Iniciação', peel: 'Proteção', poke: 'Poke',
-  dive: 'Dive', scaling: 'Scaling', tempo: 'Early game', shred: 'Anti-tank'
-};
+const tagKeys = ['frontline', 'engage', 'peel', 'poke', 'dive', 'scaling', 'tempo', 'shred'];
 
 const scenarios = [
   { name: 'O cerco', season: '2024', patch: '14.19.1', rank: 'Esmeralda', style: 'Poke e controlo de zona', enemy: ['Aatrox', 'Graves', 'Syndra', 'Jhin', 'Karma'], seed: 6, pace: 0.25, finesse: 0.25,
@@ -127,25 +124,49 @@ function encounter(index) {
   return { ...scenario, enemy };
 }
 
-function draftPool(scenario, openRoles, assigned) {
+function draftPool(scenario, openRoles, assigned, focusRole) {
   const legal = new Set(rosters[scenario.patch]);
   const mask = openRoles.reduce((value, role) => value | (1 << role), 0);
-  const random = seededDraw(scenario.seed + 1000 + 53 * mask);
+  const random = seededDraw(scenario.seed + 1000 + 53 * mask + 997 * focusRole);
   const eligible = draftChampions.filter(id => legal.has(id) && !scenario.enemy.includes(id) && !assigned.includes(id));
   const selected = [];
-  const startingRole = Math.floor(random() * openRoles.length);
-  const featured = openRoles.map(role => new Set(scenario.pool?.[role].split(' ') ?? []));
-  for (let index = 0; index < 6; index++) {
-    const offset = (startingRole + index) % openRoles.length;
-    const role = openRoles[offset];
-    const options = eligible.filter(id => !selected.includes(id)).map(id => {
-      const counter = laneEdges.some(([pick, enemy]) => id === pick && scenario.enemy[role] === enemy);
-      return { id, weight: roleProbability(id, role, scenario.patch) ** 1.5 * (featured[offset].has(id) || counter ? 2 : 1) };
-    }).filter(option => option.weight > 0);
+  const featured = new Set(scenario.pool?.[focusRole].split(' ') ?? []);
+  const coverage = id => openRoles.filter(role => roleProbability(id, role, scenario.patch) > 0).length;
+
+  // Five picks always fit the selected role. Flex champions get extra weight so the
+  // same pool also remains useful for the other positions that are still open.
+  for (let index = 0; index < 5; index++) {
+    const options = eligible.filter(id => !selected.includes(id) && roleProbability(id, focusRole, scenario.patch) > 0)
+      .map(id => {
+        const counter = laneEdges.some(([pick, enemy]) => id === pick && scenario.enemy[focusRole] === enemy);
+        const flexWeight = 1 + 1.8 * Math.max(0, coverage(id) - 1);
+        const roleWeight = 0.3 + roleProbability(id, focusRole, scenario.patch);
+        return { id, weight: flexWeight * roleWeight * (featured.has(id) || counter ? 2 : 1) };
+      });
     selected.push(weightedTake(options, random));
   }
-  const wildcard = eligible.filter(id => !selected.includes(id)).map(id => ({ id, weight: 1 }));
-  selected.splice(Math.floor(random() * 7), 0, weightedTake(wildcard, random));
+
+  // The last two slots repair the weakest coverage among the remaining roles.
+  // They are the only slots allowed to be incompatible with the selected role.
+  for (let index = 0; index < 2; index++) {
+    const targetRole = [...openRoles].sort((left, right) => {
+      const leftCoverage = selected.filter(id => roleProbability(id, left, scenario.patch) > 0).length;
+      const rightCoverage = selected.filter(id => roleProbability(id, right, scenario.patch) > 0).length;
+      return leftCoverage - rightCoverage || left - right;
+    })[0];
+    const options = eligible.filter(id => !selected.includes(id) && roleProbability(id, targetRole, scenario.patch) > 0)
+      .map(id => ({
+        id,
+        weight: (0.3 + roleProbability(id, targetRole, scenario.patch)) * (1 + 1.8 * Math.max(0, coverage(id) - 1))
+      }));
+    selected.push(weightedTake(options, random));
+  }
+
+  // Keep the order unpredictable while preserving the composition guarantees.
+  for (let index = selected.length - 1; index > 0; index--) {
+    const swap = Math.floor(random() * (index + 1));
+    [selected[index], selected[swap]] = [selected[swap], selected[index]];
+  }
   return selected;
 }
 
