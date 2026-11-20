@@ -3,44 +3,48 @@ const roleMarks = ['▲', '✦', '◆', '◎', '✚'];
 const bestByPools = new Map();
 const translations = {
   pt: {
-    locale: 'pt-PT', languageLabel: 'Idioma', choose: 'Escolher', picks: 'PICKS', howToPlay: 'Como jogar',
+    locale: 'pt-PT', languageLabel: 'Idioma', choose: 'Vazio', picks: 'PICKS', howToPlay: 'Como jogar',
     tagline: 'Lê o draft rival. Escolhe os teus cinco. Maximiza o winrate.', enemyTeam: 'Equipa adversária', redSide: 'LADO VERMELHO',
-    yourTeam: 'A tua equipa', choosePerRole: 'Escolhe um champion por posição.', chooseFor: 'Escolhe para', clearPicks: 'Limpar picks',
-    simulatedModel: 'Modelo de composição e winrate simulado', calculate: 'Calcular winrate', draftResult: 'Resultado do draft', reviewPicks: 'Rever picks',
-    bestTeam: 'Melhor equipa com os sorteios que tiveste', fanGame: 'Rift Draft · Jogo de fãs', credits: 'Catálogo e retratos', inspired: 'Inspirado no',
+    yourTeam: 'A tua equipa', choosePerRole: 'Escolhe um champion e depois atribui-lhe uma role.',
+    chooseChampion: 'Escolhe um champion', chooseRole: 'Agora escolhe uma role para {champion}',
+    simulatedModel: 'Modelo de composição e winrate simulado', calculate: 'Calcular winrate', draftResult: 'Resultado do draft',
+    bestTeam: 'Melhor equipa possível com as pools que recebeste', fanGame: 'Rift Draft · Jogo de fãs', credits: 'Catálogo e retratos', inspired: 'Inspirado no',
     helpOne: 'Vê a equipa adversária, o patch da season e o rank do cenário.',
-    helpTwo: 'Seleciona uma posição e escolhe qualquer champion da pool partilhada. O sorteio favorece flex picks e as posições que ainda estão livres.',
-    helpThree: 'Completa as cinco posições e compara o teu winrate com a melhor equipa possível usando as pools que te saíram.',
+    helpTwo: 'Escolhe um champion da pool de dez e depois clica numa role vazia. A escolha fica bloqueada.',
+    helpThree: 'Depois de cada escolha surge uma nova pool de dez, equilibrada para as roles que continuam vazias.',
     helpModel: 'Cada champion tem uma adequação escondida às diferentes posições. Podes colocá-lo em qualquer role, mas uma escolha menos habitual reduz a pontuação final.',
-    backToDraft: 'Voltar ao draft', nextScenario: 'Próximo cenário', poolSaved: 'Pool disponível quando preencheste esta posição.', poolAll: 'Pool partilhada pelas cinco posições.',
-    poolFavors: roles => `A pool favorece ${roles}.`, bestResult: 'Atingiste o melhor winrate com as pools que te saíram.', tiedResult: 'Igualaste o melhor winrate à décima.',
-    gapResult: gap => `Ficaste a ${gap} p.p. do melhor winrate com estas pools.`, yourWinrate: 'O TEU WINRATE SIMULADO', maxWinrate: 'MÁXIMO COM ESTAS POOLS',
+    backToDraft: 'Voltar ao draft', nextScenario: 'Próximo cenário',
+    bestResult: 'Atingiste o melhor winrate possível com as pools que recebeste.', tiedResult: 'Igualaste o melhor winrate à décima.',
+    gapResult: gap => `Ficaste a ${gap} p.p. do melhor winrate possível.`, yourWinrate: 'O TEU WINRATE SIMULADO', maxWinrate: 'MÁXIMO POSSÍVEL',
     factors: ['Matchups', 'Equilíbrio da equipa', 'Season e rank', 'Adequação às roles'], favorable: 'Favorável', unfavorable: 'Desfavorável', neutral: 'Neutro',
     magic: 'Dano mágico', physical: 'Dano físico', traits: {frontline:'Linha da frente',engage:'Iniciação',peel:'Proteção',poke:'Poke',dive:'Dive',scaling:'Scaling',tempo:'Early game',shred:'Anti-tank'},
     ranks: {Emerald:'Esmeralda',Silver:'Prata',Diamond:'Diamante',Gold:'Ouro',Master:'Mestre',Platinum:'Platina'},
     scenario: [['O cerco','Poke e controlo de zona'],['À queima-roupa','Dive coordenado'],['A última luta','Scaling e proteção do ADC'],['Sem espaço','Pressão nas lanes e pickoffs'],['Linha de choque','Linha da frente e teamfight'],['A cinco passos','Poke e proteção'],['Ponto cego','Emboscadas e acesso à backline'],['Sem travões','Pressão cedo e engage']],
-    picked: (champion, role, done) => `${champion} em ${role}. ${done ? 'Equipa completa.' : 'Escolhe a próxima posição.'}`,
-    newScenario: (name, season, rank) => `Novo cenário: ${name}, ${season}, rank ${rank}.`, cleared: 'Picks limpos.'
+    selected: champion => `${champion} selecionado. Escolhe uma role vazia.`,
+    picked: (champion, role, done) => `${champion} colocado em ${role}. ${done ? 'Equipa completa.' : 'Nova pool disponível.'}`,
+    newScenario: (name, season, rank) => `Novo cenário: ${name}, ${season}, rank ${rank}.`
   },
   en: {
-    locale: 'en-GB', languageLabel: 'Language', choose: 'Choose', picks: 'PICKS', howToPlay: 'How to play',
+    locale: 'en-GB', languageLabel: 'Language', choose: 'Empty', picks: 'PICKS', howToPlay: 'How to play',
     tagline: 'Read the enemy draft. Pick your five. Maximise your win rate.', enemyTeam: 'Enemy team', redSide: 'RED SIDE',
-    yourTeam: 'Your team', choosePerRole: 'Choose one champion for each role.', chooseFor: 'Choose for', clearPicks: 'Clear picks',
-    simulatedModel: 'Team composition model and simulated win rate', calculate: 'Calculate win rate', draftResult: 'Draft result', reviewPicks: 'Review picks',
-    bestTeam: 'Best team from the pools you received', fanGame: 'Rift Draft · Fan game', credits: 'Champion catalogue and portraits', inspired: 'Inspired by',
+    yourTeam: 'Your team', choosePerRole: 'Choose a champion and then assign it to a role.',
+    chooseChampion: 'Choose a champion', chooseRole: 'Now choose a role for {champion}',
+    simulatedModel: 'Team composition model and simulated win rate', calculate: 'Calculate win rate', draftResult: 'Draft result',
+    bestTeam: 'Best possible team from the pools you received', fanGame: 'Rift Draft · Fan game', credits: 'Champion catalogue and portraits', inspired: 'Inspired by',
     helpOne: 'Check the enemy team, season patch and rank for the scenario.',
-    helpTwo: 'Select a role and choose any champion from the shared pool. The draw favours flex picks and the roles still open.',
-    helpThree: 'Fill all five roles and compare your win rate with the strongest team possible from the pools you received.',
+    helpTwo: 'Choose a champion from the pool of ten, then click an empty role. Your choice is locked.',
+    helpThree: 'After every choice, a new pool of ten appears, balanced around the roles still empty.',
     helpModel: 'Every champion has hidden suitability for each role. You can place them anywhere, but an unusual assignment lowers the final score.',
-    backToDraft: 'Back to draft', nextScenario: 'Next scenario', poolSaved: 'Pool shown when you filled this role.', poolAll: 'Shared pool for all five roles.',
-    poolFavors: roles => `The pool favours ${roles}.`, bestResult: 'You reached the best win rate from your pools.', tiedResult: 'You matched the best win rate to one decimal place.',
-    gapResult: gap => `You finished ${gap} pp behind the best win rate from these pools.`, yourWinrate: 'YOUR SIMULATED WIN RATE', maxWinrate: 'MAXIMUM FROM THESE POOLS',
+    backToDraft: 'Back to draft', nextScenario: 'Next scenario',
+    bestResult: 'You reached the best possible win rate from your pools.', tiedResult: 'You matched the best win rate to one decimal place.',
+    gapResult: gap => `You finished ${gap} pp behind the best possible win rate.`, yourWinrate: 'YOUR SIMULATED WIN RATE', maxWinrate: 'MAXIMUM POSSIBLE',
     factors: ['Matchups', 'Team balance', 'Season and rank', 'Role suitability'], favorable: 'Favourable', unfavorable: 'Unfavourable', neutral: 'Neutral',
     magic: 'Magic damage', physical: 'Physical damage', traits: {frontline:'Front line',engage:'Engage',peel:'Peel',poke:'Poke',dive:'Dive',scaling:'Scaling',tempo:'Early game',shred:'Anti-tank'},
     ranks: {Emerald:'Emerald',Silver:'Silver',Diamond:'Diamond',Gold:'Gold',Master:'Master',Platinum:'Platinum'},
     scenario: [['The siege','Poke and zone control'],['Point-blank','Coordinated dive'],['The final fight','Scaling and ADC protection'],['No room','Lane pressure and pickoffs'],['Shock line','Front line and teamfights'],['Five steps away','Poke and protection'],['Blind spot','Ambushes and backline access'],['No brakes','Early pressure and engage']],
-    picked: (champion, role, done) => `${champion} in ${role}. ${done ? 'Team complete.' : 'Choose the next role.'}`,
-    newScenario: (name, season, rank) => `New scenario: ${name}, ${season}, ${rank}.`, cleared: 'Picks cleared.'
+    selected: champion => `${champion} selected. Choose an empty role.`,
+    picked: (champion, role, done) => `${champion} placed in ${role}. ${done ? 'Team complete.' : 'A new pool is ready.'}`,
+    newScenario: (name, season, rank) => `New scenario: ${name}, ${season}, ${rank}.`
   }
 };
 const rankKeys = ['Emerald', 'Silver', 'Diamond', 'Gold', 'Master', 'Platinum', 'Silver', 'Platinum'];
@@ -49,9 +53,9 @@ let scenarioIndex = 0;
 let scenario;
 let score;
 let lineup;
+let currentPool;
 let offersByRole;
-let availablePool;
-let activeRole;
+let selectedChampion;
 let showingResult;
 let matchupRound = 0;
 const copy = () => translations[language];
@@ -66,9 +70,8 @@ function slot(id, index, interactive = false) {
   const role = roles[index];
   const name = id ? champions[id][0] : copy().choose;
   const content = `<span class="slot-role"><span aria-hidden="true">${roleMarks[index]}</span> ${role}</span>${id ? portrait(id) : '<span class="empty-portrait" aria-hidden="true">+</span>'}<span class="slot-name">${name}</span>`;
-  if (!interactive) return `<div class="slot filled">${content}</div>`;
-  const active = activeRole === index && !showingResult;
-  return `<button type="button" class="slot ${id ? 'filled' : 'unfilled'}" data-role="${index}" aria-pressed="${active}" aria-label="${role}: ${name}">${content}</button>`;
+  if (!interactive || id) return `<div class="slot ${id ? 'filled' : 'unfilled'}">${content}</div>`;
+  return `<button type="button" class="slot unfilled ${selectedChampion ? 'role-ready' : ''}" data-role="${index}" ${selectedChampion ? '' : 'disabled'} aria-label="${role}: ${name}">${content}</button>`;
 }
 
 function renderStaticCopy() {
@@ -93,20 +96,22 @@ function renderDraft() {
   $('draft-panel').hidden = showingResult;
   $('results').hidden = !showingResult;
   if (showingResult) return;
-  const open = roles.map((_, index) => index).filter(index => !lineup[index]);
-  if (open.length) availablePool = draftPool(scenario, open, lineup, activeRole);
-  const options = offersByRole[activeRole] ?? availablePool;
-  $('active-role').textContent = roles[activeRole];
-  const openNames = new Intl.ListFormat(copy().locale).format(open.map(index => roles[index]));
-  $('pool-note').textContent = lineup[activeRole] ? copy().poolSaved : open.length === roles.length ? copy().poolAll : copy().poolFavors(openNames);
-  $('reset').disabled = picked === 0;
+  $('pool-heading').textContent = selectedChampion
+    ? copy().chooseRole.replace('{champion}', champions[selectedChampion][0])
+    : copy().chooseChampion;
   $('evaluate').disabled = picked !== roles.length;
-  $('options').innerHTML = options.map(id => {
+  $('options').innerHTML = currentPool.map(id => {
     const labelKey = tagKeys.find(key => trait(id, key));
     const label = labelKey ? copy().traits[labelKey] : traits.ap.has(id) ? copy().magic : copy().physical;
-    const pickedElsewhere = lineup.includes(id) && lineup[activeRole] !== id;
-    return `<button type="button" class="option" data-champion="${id}" aria-pressed="${lineup[activeRole] === id}" ${pickedElsewhere ? 'disabled' : ''}>${portrait(id)}<span class="option-name">${champions[id][0]}</span><span class="option-trait">${label}</span></button>`;
+    const used = lineup.includes(id);
+    return `<button type="button" class="option" data-champion="${id}" aria-pressed="${selectedChampion === id}" ${used ? 'disabled' : ''}>${portrait(id)}<span class="option-name">${champions[id][0]}</span><span class="option-trait">${label}</span></button>`;
   }).join('');
+}
+
+function refreshPool() {
+  const openRoles = roles.map((_, index) => index).filter(index => !lineup[index]);
+  if (!openRoles.length) return;
+  currentPool = draftPool(scenario, openRoles, lineup.filter(Boolean));
 }
 
 function startScenario(index) {
@@ -115,8 +120,9 @@ function startScenario(index) {
   score = scoring(scenario);
   lineup = Array(roles.length).fill(null);
   offersByRole = Array(roles.length).fill(null);
-  activeRole = 0;
+  selectedChampion = null;
   showingResult = false;
+  refreshPool();
   $('season').textContent = scenario.season;
   $('patch').textContent = `Patch ${scenario.patch.split('.').slice(0, 2).join('.')}`;
   renderScenarioCopy();
@@ -145,13 +151,6 @@ function showResult() {
   $('result-heading').focus();
 }
 
-function openRole(index, focus) {
-  showingResult = false;
-  activeRole = index;
-  renderDraft();
-  if (focus) document.querySelector(`[data-role="${index}"]`).focus();
-}
-
 function setLanguage(nextLanguage) {
   language = nextLanguage;
   try { localStorage.setItem('rift-language', language); } catch {}
@@ -160,26 +159,35 @@ function setLanguage(nextLanguage) {
   if (showingResult) showResult(); else renderDraft();
 }
 
-$('player-team').addEventListener('click', event => { const button = event.target.closest('[data-role]'); if (button) openRole(Number(button.dataset.role), event.detail === 0); });
 $('options').addEventListener('click', event => {
   const option = event.target.closest('[data-champion]');
-  if (!option) return;
-  const id = option.dataset.champion;
-  const role = activeRole;
-  if (lineup.includes(id) && lineup[role] !== id) return;
-  if (!offersByRole[role]) offersByRole[role] = availablePool;
-  lineup[role] = id;
-  const nextRole = lineup.findIndex((pick, index) => !pick && index > role);
-  const firstEmpty = lineup.indexOf(null);
-  activeRole = nextRole >= 0 ? nextRole : firstEmpty >= 0 ? firstEmpty : role;
+  if (!option || lineup.includes(option.dataset.champion)) return;
+  selectedChampion = option.dataset.champion;
   renderDraft();
-  $('announcement').textContent = copy().picked(champions[id][0], roles[role], firstEmpty < 0);
-  if (event.detail === 0) (firstEmpty < 0 ? $('evaluate') : $('options').querySelector('button:not(:disabled)')).focus();
+  $('announcement').textContent = copy().selected(champions[selectedChampion][0]);
 });
-$('new-scenario').addEventListener('click', () => { startScenario((scenarioIndex + 1) % scenarios.length); $('announcement').textContent = copy().newScenario(copy().scenario[scenarioIndex][0], scenario.season, copy().ranks[rankKeys[scenarioIndex]]); });
-$('reset').addEventListener('click', () => { lineup.fill(null); offersByRole.fill(null); openRole(0, true); $('announcement').textContent = copy().cleared; });
+
+$('player-team').addEventListener('click', event => {
+  const button = event.target.closest('[data-role]');
+  if (!button || !selectedChampion) return;
+  const role = Number(button.dataset.role);
+  if (lineup[role]) return;
+  const champion = selectedChampion;
+  offersByRole[role] = currentPool;
+  lineup[role] = champion;
+  selectedChampion = null;
+  const done = lineup.every(Boolean);
+  if (!done) refreshPool();
+  renderDraft();
+  $('announcement').textContent = copy().picked(champions[champion][0], roles[role], done);
+  if (event.detail === 0) (done ? $('evaluate') : $('options').querySelector('button:not(:disabled)')).focus();
+});
+
+$('new-scenario').addEventListener('click', () => {
+  startScenario((scenarioIndex + 1) % scenarios.length);
+  $('announcement').textContent = copy().newScenario(copy().scenario[scenarioIndex][0], scenario.season, copy().ranks[rankKeys[scenarioIndex]]);
+});
 $('evaluate').addEventListener('click', showResult);
-$('edit').addEventListener('click', () => openRole(activeRole, true));
 $('open-help').addEventListener('click', () => $('help').showModal());
 document.querySelectorAll('[data-language]').forEach(button => button.addEventListener('click', () => setLanguage(button.dataset.language)));
 renderStaticCopy();

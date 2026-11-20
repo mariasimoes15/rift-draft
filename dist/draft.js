@@ -131,45 +131,29 @@ function encounter(index, round = 0) {
   return { ...scenario, enemy, drawSeed };
 }
 
-function draftPool(scenario, openRoles, assigned, focusRole) {
+function draftPool(scenario, openRoles, assigned) {
   const legal = new Set(rosters[scenario.patch]);
   const mask = openRoles.reduce((value, role) => value | (1 << role), 0);
-  const random = seededDraw((scenario.drawSeed + 1000 + 53 * mask + 997 * focusRole) >>> 0);
+  const random = seededDraw((scenario.drawSeed + 1000 + 53 * mask + 997 * assigned.length) >>> 0);
   const eligible = draftChampions.filter(id => legal.has(id) && !scenario.enemy.includes(id) && !assigned.includes(id));
   const selected = [];
-  const featured = new Set(scenario.pool?.[focusRole].split(' ') ?? []);
   const coverage = id => openRoles.filter(role => roleProbability(id, role, scenario.patch) > 0).length;
+  const startingRole = Math.floor(random() * openRoles.length);
 
-  // Five picks always fit the selected role. Flex champions get extra weight so the
-  // same pool also remains useful for the other positions that are still open.
-  for (let index = 0; index < 5; index++) {
-    const options = eligible.filter(id => !selected.includes(id) && roleProbability(id, focusRole, scenario.patch) > 0)
+  // Split ten draws as evenly as possible across the roles that remain open.
+  for (let index = 0; index < 10; index++) {
+    const role = openRoles[(startingRole + index) % openRoles.length];
+    const featured = new Set(scenario.pool?.[role].split(' ') ?? []);
+    const options = eligible.filter(id => !selected.includes(id) && roleProbability(id, role, scenario.patch) > 0)
       .map(id => {
-        const counter = laneEdges.some(([pick, enemy]) => id === pick && scenario.enemy[focusRole] === enemy);
-        const flexWeight = 1 + 1.8 * Math.max(0, coverage(id) - 1);
-        const roleWeight = 0.3 + roleProbability(id, focusRole, scenario.patch);
-        return { id, weight: flexWeight * roleWeight * (featured.has(id) || counter ? 2 : 1) };
+        const counter = laneEdges.some(([candidate, enemy]) => id === candidate && scenario.enemy[role] === enemy);
+        const flexWeight = 1 + 1.6 * Math.max(0, coverage(id) - 1);
+        return { id, weight: flexWeight * (0.3 + roleProbability(id, role, scenario.patch)) * (featured.has(id) || counter ? 2 : 1) };
       });
     selected.push(weightedTake(options, random));
   }
 
-  // The last two slots repair the weakest coverage among the remaining roles.
-  // They are the only slots allowed to be incompatible with the selected role.
-  for (let index = 0; index < 2; index++) {
-    const targetRole = [...openRoles].sort((left, right) => {
-      const leftCoverage = selected.filter(id => roleProbability(id, left, scenario.patch) > 0).length;
-      const rightCoverage = selected.filter(id => roleProbability(id, right, scenario.patch) > 0).length;
-      return leftCoverage - rightCoverage || left - right;
-    })[0];
-    const options = eligible.filter(id => !selected.includes(id) && roleProbability(id, targetRole, scenario.patch) > 0)
-      .map(id => ({
-        id,
-        weight: (0.3 + roleProbability(id, targetRole, scenario.patch)) * (1 + 1.8 * Math.max(0, coverage(id) - 1))
-      }));
-    selected.push(weightedTake(options, random));
-  }
-
-  // Keep the order unpredictable while preserving the composition guarantees.
+  // Keep the role behind each draw hidden from the player.
   for (let index = selected.length - 1; index > 0; index--) {
     const swap = Math.floor(random() * (index + 1));
     [selected[index], selected[swap]] = [selected[swap], selected[index]];

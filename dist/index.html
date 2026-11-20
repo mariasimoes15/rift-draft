@@ -14,7 +14,6 @@
 <body>
   <header class="site-header">
     <div class="header-inner">
-      <div class="wordmark">Rift Draft</div>
       <div class="header-actions">
         <div class="language-switch" id="language-switch" aria-label="Idioma">
           <button type="button" data-language="pt" aria-pressed="true">PT</button>
@@ -49,13 +48,13 @@
     </div>
 
     <section class="panel pool-panel" id="draft-panel" aria-labelledby="pool-heading">
-      <div class="panel-header"><div><h2 id="pool-heading"><span data-i18n="chooseFor">Escolhe para</span> <span id="active-role"></span></h2><p id="pool-note"></p></div><button type="button" id="reset" class="text-button" data-i18n="clearPicks">Limpar picks</button></div>
+      <div class="panel-header"><div><h2 id="pool-heading" data-i18n="chooseChampion">Escolhe um champion</h2></div></div>
       <div id="options" class="options"></div>
       <div class="pool-footer"><p><span aria-hidden="true">◇</span> <span data-i18n="simulatedModel">Modelo de composição e winrate simulado</span></p><button type="button" id="evaluate" class="gold-button" disabled data-i18n="calculate">Calcular winrate</button></div>
     </section>
 
     <section class="panel results" id="results" aria-labelledby="result-heading" hidden>
-      <div class="panel-header"><div><h2 id="result-heading" tabindex="-1" data-i18n="draftResult">Resultado do draft</h2><p id="result-summary"></p></div><button type="button" id="edit" class="soft-button" data-i18n="reviewPicks">Rever picks</button></div>
+      <div class="panel-header"><div><h2 id="result-heading" tabindex="-1" data-i18n="draftResult">Resultado do draft</h2><p id="result-summary"></p></div></div>
       <div id="result-metrics" class="result-metrics"></div>
       <div id="result-factors" class="result-factors"></div>
       <div class="benchmark"><h3 data-i18n="bestTeam">Melhor equipa com os sorteios que tiveste</h3><div id="best-team" class="team"></div></div>
