@@ -131,10 +131,10 @@ function encounter(index, round = 0) {
   return { ...scenario, enemy, drawSeed };
 }
 
-function draftPool(scenario, openRoles, assigned) {
+function draftPool(scenario, openRoles, assigned, variant = 0) {
   const legal = new Set(rosters[scenario.patch]);
   const mask = openRoles.reduce((value, role) => value | (1 << role), 0);
-  const random = seededDraw((scenario.drawSeed + 1000 + 53 * mask + 997 * assigned.length) >>> 0);
+  const random = seededDraw((scenario.drawSeed + 1000 + 53 * mask + 997 * assigned.length + 7919 * variant) >>> 0);
   const eligible = draftChampions.filter(id => legal.has(id) && !scenario.enemy.includes(id) && !assigned.includes(id));
   const selected = [];
   const coverage = id => openRoles.filter(role => roleProbability(id, role, scenario.patch) > 0).length;
