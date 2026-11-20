@@ -3,7 +3,7 @@ const roleMarks = ['▲', '✦', '◆', '◎', '✚'];
 const bestByPools = new Map();
 const translations = {
   pt: {
-    locale: 'pt-PT', languageLabel: 'Idioma', choose: 'Escolher', picks: 'PICKS', howToPlay: 'Como jogar', challenge: 'DESAFIO DE COUNTER-DRAFT',
+    locale: 'pt-PT', languageLabel: 'Idioma', choose: 'Escolher', picks: 'PICKS', howToPlay: 'Como jogar',
     tagline: 'Lê o draft rival. Escolhe os teus cinco. Maximiza o winrate.', enemyTeam: 'Equipa adversária', redSide: 'LADO VERMELHO',
     yourTeam: 'A tua equipa', choosePerRole: 'Escolhe um champion por posição.', chooseFor: 'Escolhe para', clearPicks: 'Limpar picks',
     simulatedModel: 'Modelo de composição e winrate simulado', calculate: 'Calcular winrate', draftResult: 'Resultado do draft', reviewPicks: 'Rever picks',
@@ -23,7 +23,7 @@ const translations = {
     newScenario: (name, season, rank) => `Novo cenário: ${name}, ${season}, rank ${rank}.`, cleared: 'Picks limpos.'
   },
   en: {
-    locale: 'en-GB', languageLabel: 'Language', choose: 'Choose', picks: 'PICKS', howToPlay: 'How to play', challenge: 'COUNTER-DRAFT CHALLENGE',
+    locale: 'en-GB', languageLabel: 'Language', choose: 'Choose', picks: 'PICKS', howToPlay: 'How to play',
     tagline: 'Read the enemy draft. Pick your five. Maximise your win rate.', enemyTeam: 'Enemy team', redSide: 'RED SIDE',
     yourTeam: 'Your team', choosePerRole: 'Choose one champion for each role.', chooseFor: 'Choose for', clearPicks: 'Clear picks',
     simulatedModel: 'Team composition model and simulated win rate', calculate: 'Calculate win rate', draftResult: 'Draft result', reviewPicks: 'Review picks',

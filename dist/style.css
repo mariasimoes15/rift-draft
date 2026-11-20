@@ -30,7 +30,6 @@ h1, h2, h3, p { margin: 0; }
 .site-header { border-bottom: 1px solid #ffffff15; background: #080f18a6; }
 .header-inner { min-height: 65px; display: flex; justify-content: space-between; align-items: center; gap: 16px; }
 .wordmark { display: flex; align-items: center; gap: 12px; font: 700 1.17rem Georgia, serif; letter-spacing: .04em; }
-.brand-mark { display: grid; place-items: center; width: 30px; height: 30px; border: 1px solid #987b4d; color: var(--gold); font-size: 1.18rem; transform: rotate(45deg); }
 .soft-button, .text-button, .gold-button {
   border: 1px solid var(--line);
   border-radius: 6px;
@@ -73,8 +72,6 @@ h1, h2, h3, p { margin: 0; }
   pointer-events: none;
 }
 .intro::after { left: 67%; top: -315px; opacity: .55; }
-.eyebrow { display: flex; align-items: center; gap: 9px; color: var(--gold); font-size: .75rem; font-weight: 750; letter-spacing: .16em; }
-.eyebrow span { width: 7px; height: 7px; transform: rotate(45deg); background: var(--gold); }
 h1 { font: 500 clamp(3.7rem, 8.6vw, 6.6rem)/.95 Georgia, serif; letter-spacing: -.075em; margin: 12px 0 15px; }
 h1 em { color: var(--gold); font-weight: inherit; }
 .intro-copy > p:last-child { color: #c6d0da; line-height: 1.45; }
