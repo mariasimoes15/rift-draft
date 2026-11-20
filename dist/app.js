@@ -14,9 +14,7 @@ const translations = {
     helpThree: 'Depois de cada escolha surge uma nova pool de dez e é revelado mais um adversário. Podes trocar uma pool por draft.',
     helpModel: 'Cada champion tem uma adequação escondida às diferentes posições. Podes colocá-lo em qualquer role, mas uma escolha menos habitual reduz a pontuação final.',
     backToDraft: 'Voltar ao draft', nextScenario: 'Próximo cenário', hiddenEnemy: 'Por revelar', gradeLabel: 'CLASSIFICAÇÃO',
-    bestPickLabel: 'Melhor pick', worstPickLabel: 'Pick mais arriscado', bestScoreLabel: 'Melhor winrate', streakLabel: 'Streak atual',
-    bestPickText: (champion, role) => `${champion} foi a escolha que mais valorizou a composição em ${role}.`,
-    worstPickText: (champion, role, alternative, value) => `${champion} foi o pick mais arriscado em ${role}. A melhor alternativa disponível era ${alternative} (${value}%).`,
+    bestScoreLabel: 'Melhor winrate', streakLabel: 'Streak atual',
     enemyRevealed: champion => `${champion} foi revelado na equipa adversária.`,
     bestResult: 'Atingiste o melhor winrate possível com as pools que recebeste.', tiedResult: 'Igualaste o melhor winrate à décima.',
     gapResult: gap => `Ficaste a ${gap} p.p. do melhor winrate possível.`, yourWinrate: 'O TEU WINRATE SIMULADO', maxWinrate: 'MÁXIMO POSSÍVEL',
@@ -40,9 +38,7 @@ const translations = {
     helpThree: 'After every choice, a new pool of ten appears and another enemy is revealed. You may reroll one pool per draft.',
     helpModel: 'Every champion has hidden suitability for each role. You can place them anywhere, but an unusual assignment lowers the final score.',
     backToDraft: 'Back to draft', nextScenario: 'Next scenario', hiddenEnemy: 'Hidden', gradeLabel: 'GRADE',
-    bestPickLabel: 'Best pick', worstPickLabel: 'Riskiest pick', bestScoreLabel: 'Best win rate', streakLabel: 'Current streak',
-    bestPickText: (champion, role) => `${champion} added the most value to your composition in ${role}.`,
-    worstPickText: (champion, role, alternative, value) => `${champion} was the riskiest pick in ${role}. The best available alternative was ${alternative} (${value}%).`,
+    bestScoreLabel: 'Best win rate', streakLabel: 'Current streak',
     enemyRevealed: champion => `${champion} was revealed on the enemy team.`,
     bestResult: 'You reached the best possible win rate from your pools.', tiedResult: 'You matched the best win rate to one decimal place.',
     gapResult: gap => `You finished ${gap} pp behind the best possible win rate.`, yourWinrate: 'YOUR SIMULATED WIN RATE', maxWinrate: 'MAXIMUM POSSIBLE',
@@ -186,30 +182,11 @@ function gradeFor(percent) {
   return 'D';
 }
 
-function analyzePicks(result) {
-  return lineup.map((champion, role) => {
-    const alternatives = offersByRole[role].filter(id => id !== champion && !lineup.includes(id));
-    const scored = alternatives.map(id => {
-      const team = [...lineup];
-      team[role] = id;
-      return { id, percent: score(team).percent };
-    }).sort((left, right) => right.percent - left.percent);
-    const average = scored.reduce((sum, item) => sum + item.percent, 0) / scored.length;
-    return {
-      champion,
-      role,
-      contribution: result.percent - average,
-      alternative: scored[0]
-    };
-  });
-}
-
 function prepareResult() {
   const result = score(lineup);
   const route = JSON.stringify([scenarioIndex, offersByRole]);
   if (!bestByPools.has(route)) bestByPools.set(route, bestDraft(offersByRole, score));
   const best = bestByPools.get(route);
-  const analyses = analyzePicks(result).sort((left, right) => right.contribution - left.contribution);
   const progress = loadProgress();
   progress.best = Math.max(progress.best, result.percent);
   progress.streak = result.percent > 50 ? progress.streak + 1 : 0;
@@ -219,8 +196,6 @@ function prepareResult() {
     best,
     gap: (Math.round(best.percent * 10) - Math.round(result.percent * 10)) / 10,
     grade: gradeFor(result.percent),
-    bestPick: analyses[0],
-    worstPick: analyses.at(-1),
     progress
   };
 }
@@ -228,7 +203,7 @@ function prepareResult() {
 function showResult() {
   if (lineup.some(id => !id)) return;
   if (!resultData) resultData = prepareResult();
-  const { result, best, gap, grade, bestPick, worstPick, progress } = resultData;
+  const { result, best, gap, grade, progress } = resultData;
   showingResult = true;
   $('result-summary').textContent = result.percent === best.percent ? copy().bestResult : gap === 0 ? copy().tiedResult : copy().gapResult(formatPercent(gap));
   $('result-metrics').innerHTML = `
@@ -241,9 +216,6 @@ function showResult() {
     const impact = rounded > 0 ? copy().favorable : rounded < 0 ? copy().unfavorable : copy().neutral;
     return `<div data-impact="${Math.sign(rounded)}"><span>${label}</span><strong>${impact}</strong></div>`;
   }).join('');
-  $('result-analysis').innerHTML = `
-    <article><h3>${copy().bestPickLabel}</h3><p>${copy().bestPickText(champions[bestPick.champion][0], roles[bestPick.role])}</p></article>
-    <article><h3>${copy().worstPickLabel}</h3><p>${copy().worstPickText(champions[worstPick.champion][0], roles[worstPick.role], champions[worstPick.alternative.id][0], formatPercent(worstPick.alternative.percent))}</p></article>`;
   $('result-progress').innerHTML = `
     <div>${copy().bestScoreLabel}<strong>${formatPercent(progress.best)}%</strong></div>
     <div>${copy().streakLabel}<strong>${progress.streak}</strong></div>`;
