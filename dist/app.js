@@ -53,6 +53,7 @@ let offersByRole;
 let availablePool;
 let activeRole;
 let showingResult;
+let matchupRound = 0;
 const copy = () => translations[language];
 const formatPercent = value => new Intl.NumberFormat(copy().locale, {minimumFractionDigits: 1, maximumFractionDigits: 1}).format(value);
 
@@ -110,7 +111,7 @@ function renderDraft() {
 
 function startScenario(index) {
   scenarioIndex = index;
-  scenario = encounter(index);
+  scenario = encounter(index, matchupRound++);
   score = scoring(scenario);
   lineup = Array(roles.length).fill(null);
   offersByRole = Array(roles.length).fill(null);
@@ -182,4 +183,4 @@ $('edit').addEventListener('click', () => openRole(activeRole, true));
 $('open-help').addEventListener('click', () => $('help').showModal());
 document.querySelectorAll('[data-language]').forEach(button => button.addEventListener('click', () => setLanguage(button.dataset.language)));
 renderStaticCopy();
-startScenario(0);
+startScenario(playerSeed % scenarios.length);

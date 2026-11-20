@@ -1,4 +1,10 @@
 const roles = ['Top', 'Jungle', 'Mid', 'ADC', 'Support'];
+const playerSeed = (() => {
+  const values = new Uint32Array(1);
+  if (globalThis.crypto?.getRandomValues) globalThis.crypto.getRandomValues(values);
+  else values[0] = Math.floor(Math.random() * 2 ** 32);
+  return values[0];
+})();
 
 const roleChampions = [
   'Aatrox Camille Darius Fiora Gangplank Garen Gnar Gwen Jax Kennen KSante Malphite Mordekaiser Ornn Renekton Riven Rumble Sett Shen Sion Teemo Urgot',
@@ -109,10 +115,11 @@ function weightedTake(options, random) {
   return options.splice(index < 0 ? options.length - 1 : index, 1)[0].id;
 }
 
-function encounter(index) {
+function encounter(index, round = 0) {
   const scenario = scenarios[index];
   const legal = new Set(rosters[scenario.patch]);
-  const random = seededDraw(scenario.seed);
+  const drawSeed = (scenario.seed ^ playerSeed ^ Math.imul(round + 1, 2654435761)) >>> 0;
+  const random = seededDraw(drawSeed);
   const enemy = [];
   for (const [role, featured] of scenario.enemy.entries()) {
     const candidates = [featured, ...rivalAlternatives[index][role].split(' ')]
@@ -121,13 +128,13 @@ function encounter(index) {
       .filter(option => option.weight > 0);
     enemy.push(weightedTake(candidates, random));
   }
-  return { ...scenario, enemy };
+  return { ...scenario, enemy, drawSeed };
 }
 
 function draftPool(scenario, openRoles, assigned, focusRole) {
   const legal = new Set(rosters[scenario.patch]);
   const mask = openRoles.reduce((value, role) => value | (1 << role), 0);
-  const random = seededDraw(scenario.seed + 1000 + 53 * mask + 997 * focusRole);
+  const random = seededDraw((scenario.drawSeed + 1000 + 53 * mask + 997 * focusRole) >>> 0);
   const eligible = draftChampions.filter(id => legal.has(id) && !scenario.enemy.includes(id) && !assigned.includes(id));
   const selected = [];
   const featured = new Set(scenario.pool?.[focusRole].split(' ') ?? []);
